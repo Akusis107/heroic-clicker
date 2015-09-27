@@ -86,7 +86,7 @@ ButtonRun:
   IniWrite, %EntertedAscendOnStart%, Settings.ini, HeroicClicker, AscendOnStart
   IniWrite, %EntertedKeepInFront%, Settings.ini, HeroicClicker, KeepInFront
   validateInputs()
-  bringToFront()
+  WinActivate, %title% ;make it active here and it will run better at the start.
   doEverything(EntertedAscendOnStart)
   ExitApp
   
@@ -97,7 +97,7 @@ bringToFront(){
 }
 
 validateInputs() {
-  if (idleMinutes > minutesPerAscension) {
+  if (idleMinutes > minutesPerAscension && minutesPerAscension != 0) {
     MsgBox, Idle minutes can not be higher then ascension minutes.  Program will exit.
     ExitApp
   }
@@ -183,28 +183,46 @@ ascend() {
 }
 
 irisStart() {
-  ; Just kill some to get initial gold
-  Loop, 20 {
-    getSkillBonusClickable()
-    collectGold()
-  }
-
-  ; Go up by twelve levels at a time
-  steps := Round(irislevel / 13)
-  Loop, %steps% {
-    if(stop) {
-        return
-    }
-    scrollToListBottom()
-    clickHeroInSlot(2,25)
-    scrollToFarmZone(13)
-    ; Let it get some gold on this new level
-    Loop, 10 {
+  if (!idle){
+    ; Just kill some to get initial gold
+    Loop, 20 {
       getSkillBonusClickable()
-      getClickables()
       collectGold()
-      Sleep timing
     }
+
+    ; Go up by twelve levels at a time
+    steps := Round(irislevel / 13)
+    Loop, %steps% {
+      if(stop) {
+          return
+      }
+      scrollToListBottom()
+      clickHeroInSlot(2,25)
+      scrollToFarmZone(13)
+      ; Let it get some gold on this new level
+      Loop, 10 {
+        getSkillBonusClickable()
+        getClickables()
+        collectGold()
+        Sleep timing
+      }
+    }
+  } else {
+    ;idle start. need gold at start to work 100%
+    steps := Round(irislevel / 13)
+    Loop, %steps% {
+      if(stop) {
+          return
+      }
+      scrollToListBottom()
+      clickHeroInSlot(2,25)
+      scrollToFarmZone(13)
+      ; Let it get some gold on this new level
+      Loop, 10 {
+        Sleep 500
+      }
+    }
+    
   }
   clickProgressionMode()
 }
